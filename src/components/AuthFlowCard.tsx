@@ -159,6 +159,16 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
 
   const isParFlow = flowType === 'par'
 
+  // Function to get display config without state (unless explicitly set)
+  const getDisplayConfig = () => {
+    const { state, ...configWithoutState } = config
+    // Only include state if it was explicitly set in the config (not auto-generated)
+    if (state && externalConfig) {
+      return config
+    }
+    return configWithoutState
+  }
+
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-xl shadow-gray-900/5 p-8 space-y-8 hover:shadow-2xl hover:shadow-gray-900/10 transition-all duration-500">
       {/* Card Header with icon */}
@@ -204,7 +214,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
         </label>
         <div className="relative">
           <textarea
-            value={JSON.stringify(config, null, 2)}
+            value={JSON.stringify(getDisplayConfig(), null, 2)}
             onChange={(e) => handleConfigChange(e.target.value)}
             className="w-full h-40 p-4 text-sm font-mono bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none shadow-inner transition-all duration-200 hover:bg-gray-50/80"
             placeholder="Enter JSON configuration..."
