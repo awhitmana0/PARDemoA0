@@ -9,12 +9,9 @@ This demo application helps developers understand the differences between tradit
 ## ✨ Features
 
 - 🔐 **Dual Auth Flows**: Compare regular OAuth and PAR side-by-side
-- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS v4
 - 📁 **JSON Configuration**: Upload config files to quickly populate both flows
 - 🍪 **Cookie Persistence**: Save configurations across browser sessions
-- 🔄 **Copy to Clipboard**: Easy callback URL copying
 - 🚀 **Full-Stack**: Frontend + Vercel serverless functions for CORS-free PAR requests
-- 📱 **Responsive**: Works seamlessly on desktop and mobile devices
 
 ## 🚀 Quick Start
 
