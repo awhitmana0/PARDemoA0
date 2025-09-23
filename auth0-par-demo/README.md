@@ -1,19 +1,15 @@
-# Auth0 Login Flow Demo
+# Auth0 PAR Demo
 
-A modern React application demonstrating both regular OAuth and PAR (Pushed Authorization Request) login flows with Auth0.
-
-![Demo Preview](https://via.placeholder.com/800x400/blue/white?text=Auth0+Login+Flow+Demo)
+A demonstration application comparing OAuth 2.0 Authorization Code flow with Pushed Authorization Request (PAR) flow.
 
 ## Features
 
-- 🔐 **Regular OAuth Flow**: Standard authorization code flow
-- 🚀 **PAR Flow**: Pushed Authorization Request (RFC 9126) implementation
-- ⚡ **Modern Stack**: Built with Vite + React + TypeScript
-- 🎨 **Clean UI**: Responsive design with Tailwind CSS
-- 📝 **Editable Configuration**: JSON-based parameter editing
-- 🔍 **Real-time Validation**: JSON syntax validation
-- 📋 **Copy to Clipboard**: Easy copying of URLs and tokens
-- 🛡️ **Error Handling**: Comprehensive error states and user feedback
+- 🔐 **Dual Auth Flows**: Compare regular OAuth and PAR side-by-side
+- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS
+- 📁 **JSON Configuration**: Upload config files to quickly populate both flows
+- 🍪 **Cookie Persistence**: Save configurations across browser sessions
+- 🔄 **Copy to Clipboard**: Easy callback URL copying
+- 🚀 **Full-Stack**: Frontend + backend proxy for CORS-free PAR requests
 
 ## Quick Start
 

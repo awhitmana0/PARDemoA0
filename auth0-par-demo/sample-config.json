@@ -1,0 +1,21 @@
+{
+  "regular": {
+    "client_id": "demo-regular-client-id-12345",
+    "response_type": "code",
+    "scope": "openid profile email",
+    "audience": "https://api.example.com",
+    "state": "abc123xyz789",
+    "domain": "demo-tenant.auth0.com",
+    "prompt": "login"
+  },
+  "par": {
+    "client_id": "demo-par-client-id-67890",
+    "response_type": "code",
+    "scope": "openid profile email",
+    "audience": "https://api.example.com",
+    "state": "abc123xyz789",
+    "domain": "demo-tenant.auth0.com",
+    "prompt": "login",
+    "client_secret": "demo-par-client-secret-abcdef"
+  }
+}
