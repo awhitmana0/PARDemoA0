@@ -5,8 +5,8 @@ import { saveConfigToCookies, loadConfigFromCookies, clearConfigFromCookies, has
 
 interface ConfigType {
   client_id: string
-  response_type: string
-  scope: string
+  response_type?: string
+  scope?: string
   audience: string
   state?: string
   domain: string

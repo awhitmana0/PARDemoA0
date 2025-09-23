@@ -3,8 +3,8 @@ import { getCallbackUrl } from '../utils/config'
 
 interface ConfigType {
   client_id: string
-  response_type: string
-  scope: string
+  response_type?: string
+  scope?: string
   audience: string
   state?: string
   domain: string
@@ -29,7 +29,7 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const validateConfig = (config: any): config is SharedConfigType => {
-    const requiredFields = ['client_id', 'response_type', 'scope', 'audience', 'domain', 'prompt']
+    const requiredFields = ['client_id', 'audience', 'domain', 'prompt']
 
     // Check if it has regular and par properties
     if (!config.regular || !config.par) {
@@ -120,16 +120,12 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
     const exampleConfig = {
       regular: {
         client_id: "your-regular-client-id",
-        response_type: "code",
-        scope: "openid profile email",
         audience: "your-api-audience",
         domain: "your-domain.auth0.com",
         prompt: "login"
       },
       par: {
         client_id: "your-par-client-id",
-        response_type: "code",
-        scope: "openid profile email",
         audience: "your-api-audience",
         domain: "your-domain.auth0.com",
         prompt: "login",
@@ -302,16 +298,12 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
             <pre>{`{
   "regular": {
     "client_id": "your-regular-client-id",
-    "response_type": "code",
-    "scope": "openid profile email",
     "audience": "your-api-audience",
     "domain": "your-domain.auth0.com",
     "prompt": "login"
   },
   "par": {
     "client_id": "your-par-client-id",
-    "response_type": "code",
-    "scope": "openid profile email",
     "audience": "your-api-audience",
     "domain": "your-domain.auth0.com",
     "prompt": "login",

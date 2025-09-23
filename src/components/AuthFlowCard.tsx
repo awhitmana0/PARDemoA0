@@ -10,8 +10,8 @@ interface AuthFlowCardProps {
 
 interface ConfigType {
   client_id: string
-  response_type: string
-  scope: string
+  response_type?: string
+  scope?: string
   audience: string
   state?: string
   domain: string
@@ -26,8 +26,6 @@ interface SharedConfigType {
 
 const defaultConfig: ConfigType = {
   client_id: "your-client-id",
-  response_type: "code",
-  scope: "openid profile email",
   audience: "your-api-audience",
   domain: "your-domain.auth0.com",
   prompt: "login"
@@ -74,16 +72,18 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
     setIsGenerating(true)
 
     try {
-      // Generate state if not provided in config
+      // Use defaults if not provided in config
       const state = config.state || Math.random().toString(36).substring(2, 15)
+      const response_type = config.response_type || "code"
+      const scope = config.scope || "openid profile email"
 
       if (type === 'regular') {
         // Regular OAuth flow
         const params = new URLSearchParams({
           client_id: config.client_id,
           redirect_uri: getCallbackUrl(),
-          response_type: config.response_type,
-          scope: config.scope,
+          response_type: response_type,
+          scope: scope,
           audience: config.audience,
           state: state,
           prompt: config.prompt
@@ -100,8 +100,8 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
           domain: config.domain,
           client_id: config.client_id,
           redirect_uri: getCallbackUrl(),
-          response_type: config.response_type,
-          scope: config.scope.replace(/\s+/g, ''), // Remove spaces like in curl
+          response_type: response_type,
+          scope: scope.replace(/\s+/g, ''), // Remove spaces like in curl
           audience: config.audience,
           state: state,
           prompt: config.prompt,
@@ -159,14 +159,19 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
 
   const isParFlow = flowType === 'par'
 
-  // Function to get display config without state (unless explicitly set)
+  // Function to get display config without defaults (unless explicitly set)
   const getDisplayConfig = () => {
-    const { state, ...configWithoutState } = config
-    // Only include state if it was explicitly set in the config (not auto-generated)
-    if (state && externalConfig) {
-      return config
+    const { state, response_type, scope, ...configWithoutDefaults } = config
+    const displayConfig = { ...configWithoutDefaults }
+
+    // Only include these fields if they were explicitly set in an external config
+    if (externalConfig) {
+      if (state) displayConfig.state = state
+      if (response_type) displayConfig.response_type = response_type
+      if (scope) displayConfig.scope = scope
     }
-    return configWithoutState
+
+    return displayConfig
   }
 
   return (

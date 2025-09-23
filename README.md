@@ -79,16 +79,12 @@ Create a JSON configuration file with both application details:
 {
   "regular": {
     "client_id": "your-regular-client-id",
-    "response_type": "code",
-    "scope": "openid profile email",
     "audience": "your-api-audience",
     "domain": "your-domain.auth0.com",
     "prompt": "login"
   },
   "par": {
     "client_id": "your-par-client-id",
-    "response_type": "code",
-    "scope": "openid profile email",
     "audience": "your-api-audience",
     "domain": "your-domain.auth0.com",
     "prompt": "login",
@@ -97,7 +93,13 @@ Create a JSON configuration file with both application details:
 }
 ```
 
-**Note**: The `state` parameter is automatically generated for security purposes. You can optionally include it in your configuration file if you need a specific state value, otherwise a random one will be generated for each request.
+**Default Values**: The following parameters are automatically set with sensible defaults but can be overridden in your configuration:
+
+- `state`: Randomly generated for security (recommended)
+- `response_type`: `"code"` (OAuth authorization code flow)
+- `scope`: `"openid profile email"` (basic OpenID Connect scopes)
+
+You can optionally include any of these parameters in your configuration file to override the defaults.
 
 ## 🏗️ Architecture
 
