@@ -1,150 +1,203 @@
 # Auth0 PAR Demo
 
-A demonstration application comparing OAuth 2.0 Authorization Code flow with Pushed Authorization Request (PAR) flow.
+A comprehensive demonstration application comparing OAuth 2.0 Authorization Code flow with Pushed Authorization Request (PAR) flow using Auth0.
 
-## Features
+## 🎯 Purpose
+
+This demo application helps developers understand the differences between traditional OAuth 2.0 flows and the enhanced security provided by PAR (Pushed Authorization Request). It provides a side-by-side comparison showing how PAR improves security by moving authorization parameters from the front-channel to a secure back-channel.
+
+## ✨ Features
 
 - 🔐 **Dual Auth Flows**: Compare regular OAuth and PAR side-by-side
-- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS
+- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS v4
 - 📁 **JSON Configuration**: Upload config files to quickly populate both flows
 - 🍪 **Cookie Persistence**: Save configurations across browser sessions
 - 🔄 **Copy to Clipboard**: Easy callback URL copying
-- 🚀 **Full-Stack**: Frontend + backend proxy for CORS-free PAR requests
+- 🚀 **Full-Stack**: Frontend + Vercel serverless functions for CORS-free PAR requests
+- 📱 **Responsive**: Works seamlessly on desktop and mobile devices
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- An Auth0 account and application
+- Two Auth0 applications (one for regular OAuth, one for PAR)
+- Auth0 tenant with PAR support
 
 ### Installation
 
 1. **Clone and install dependencies:**
    ```bash
+   git clone <repository-url>
+   cd PARDemoA0
    npm install
    ```
 
-2. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
-
-   Edit `.env` with your Auth0 application details:
-   ```env
-   VITE_AUTH0_DOMAIN=your-domain.auth0.com
-   VITE_AUTH0_CLIENT_ID=your-client-id
-   VITE_AUTH0_CLIENT_SECRET=your-client-secret
-   VITE_AUTH0_AUDIENCE=your-api-audience
-   VITE_CALLBACK_URL=http://localhost:5173/callback
-   ```
-
-3. **Configure your Auth0 application:**
-   - Add `http://localhost:5173/callback` to your allowed callback URLs
-   - Add `http://localhost:5173` to your allowed web origins
-   - For PAR flow, ensure your application type supports client credentials
-
-4. **Start the development server:**
+2. **Start the development server:**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser to `http://localhost:5173`**
+3. **Open your browser to `http://localhost:5173`**
 
-## Auth0 Application Setup
+## 🔧 Auth0 Setup
 
-### Creating an Auth0 Application
+### Creating Auth0 Applications
 
+You need **two separate Auth0 applications** for this demo:
+
+#### 1. Regular OAuth Application
 1. Go to your [Auth0 Dashboard](https://manage.auth0.com/)
 2. Navigate to Applications → Create Application
-3. Choose "Single Page Application" for regular OAuth flow
-4. For PAR flow support, you may need "Regular Web Application"
+3. Choose **"Single Page Application"**
+4. Configure the application:
+   - **Allowed Callback URLs**: `http://localhost:5173/callback` (or your deployed URL)
+   - **Allowed Web Origins**: `http://localhost:5173`
+   - **Allowed Origins (CORS)**: `http://localhost:5173`
 
-### Required Configuration
+#### 2. PAR Application
+1. Create another application
+2. Choose **"Regular Web Application"** (required for client credentials)
+3. Go to **Settings** → **Advanced Settings** → **Grant Types**
+4. Enable **"Authorization Code"** and **"Client Credentials"**
+5. In the main Settings tab, note down:
+   - **Domain**
+   - **Client ID**
+   - **Client Secret** (keep this secure!)
+6. Configure the same callback URLs as above
 
-**Allowed Callback URLs:**
+### Enabling PAR
+
+1. In your Auth0 Dashboard, go to **Tenant Settings** → **Advanced**
+2. Look for **"Pushed Authorization Requests"** and enable it
+3. Configure PAR settings as needed for your tenant
+
+### Configuration File Format
+
+Create a JSON configuration file with both application details:
+
+```json
+{
+  "regular": {
+    "client_id": "your-regular-client-id",
+    "response_type": "code",
+    "scope": "openid profile email",
+    "audience": "your-api-audience",
+    "state": "random-state-string",
+    "domain": "your-domain.auth0.com",
+    "prompt": "login"
+  },
+  "par": {
+    "client_id": "your-par-client-id",
+    "response_type": "code",
+    "scope": "openid profile email",
+    "audience": "your-api-audience",
+    "state": "random-state-string",
+    "domain": "your-domain.auth0.com",
+    "prompt": "login",
+    "client_secret": "your-par-client-secret"
+  }
+}
 ```
-http://localhost:5173/callback
-```
 
-**Allowed Web Origins:**
-```
-http://localhost:5173
-```
-
-**Allowed Origins (CORS):**
-```
-http://localhost:5173
-```
-
-### PAR Flow Requirements
-
-For the PAR (Pushed Authorization Request) flow:
-
-1. Your Auth0 tenant must support PAR (available in newer Auth0 versions)
-2. Use a "Regular Web Application" type for client secret support
-3. Enable the "Client Credentials" grant type if using client authentication
-
-## How It Works
+## 🏗️ Architecture
 
 ### Regular OAuth Flow
-
 1. User configures OAuth parameters in the JSON editor
-2. Application generates an authorization URL
+2. Application generates an authorization URL with parameters in the query string
 3. User is redirected to Auth0 for authentication
 4. Auth0 redirects back with an authorization code
 5. Callback page displays the received parameters
 
 ### PAR Flow
-
 1. User configures PAR parameters including client credentials
-2. Application makes a POST request to `/oauth/par` endpoint
+2. Application makes a POST request to Auth0's `/oauth/par` endpoint via proxy
 3. Auth0 returns a `request_uri` for the authorization request
-4. Application generates authorization URL using the `request_uri`
+4. Application generates a short authorization URL using only `client_id` and `request_uri`
 5. User is redirected to Auth0 for authentication
 6. Same callback flow as regular OAuth
 
-## Project Structure
+### Backend Proxy
+
+The application includes Vercel serverless functions (`/api/par.js`) to:
+- Proxy PAR requests to Auth0 to avoid CORS issues
+- Handle the client secret securely on the backend
+- Convert JSON requests to form-encoded data for Auth0
+
+## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   ├── Home.tsx              # Main page with two-column layout
-│   ├── OAuthFlowColumn.tsx    # Regular OAuth flow implementation
-│   ├── PARFlowColumn.tsx      # PAR flow implementation
-│   ├── ConfigurationBox.tsx   # Shared JSON configuration component
-│   └── Callback.tsx          # OAuth callback handler
-├── App.tsx                   # Router setup
-└── main.tsx                  # Application entry point
+├── src/
+│   ├── components/
+│   │   ├── Home.tsx              # Main page layout
+│   │   ├── AuthFlowCard.tsx      # Individual flow cards
+│   │   ├── ConfigUploader.tsx    # JSON config upload/download
+│   │   └── Callback.tsx          # OAuth callback handler
+│   ├── utils/
+│   │   ├── config.ts             # Environment configuration
+│   │   └── cookies.ts            # Cookie persistence utilities
+│   ├── App.tsx                   # Router setup
+│   └── main.tsx                  # Application entry point
+├── api/
+│   └── par.js                    # Vercel serverless function for PAR proxy
+├── vercel.json                   # Vercel deployment configuration
+└── vite.config.ts               # Vite + Tailwind CSS v4 setup
 ```
 
-## Available Scripts
+## 🛠️ Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-## Development Notes
+## 🔒 Security Benefits of PAR
 
-- This is a demo application for educational purposes
-- Token exchange is mocked in the callback for security reasons
-- In production, token exchange should happen on your backend server
-- Client secrets should never be exposed in frontend applications
+### Why Use PAR?
 
-## Security Considerations
+1. **Enhanced Security**: Authorization parameters are sent via secure back-channel instead of front-channel URLs
+2. **Reduced URL Length**: Authorization URLs are short and clean, preventing URL length limitations
+3. **OAuth 2.1 Ready**: Future-proof implementation aligned with OAuth 2.1 security best practices
+4. **FAPI Compliance**: Required for Financial-grade API implementations
+5. **Reduced Attack Surface**: Sensitive parameters never appear in browser history or server logs
 
-⚠️ **Important Security Notes:**
+### Security Considerations
 
-1. **Client Secret**: The client secret is exposed in this demo for educational purposes. In production:
-   - Use the implicit flow or authorization code flow with PKCE for SPAs
+⚠️ **Important Notes:**
+
+1. **Client Secret Exposure**: This demo exposes client secrets for educational purposes. In production:
    - Keep client secrets on your backend server only
+   - Use PKCE for public clients (SPAs, mobile apps)
 
-2. **Token Exchange**: Real applications should exchange authorization codes for tokens on the backend server
+2. **Token Exchange**: This demo shows the authorization code flow only. In production:
+   - Exchange authorization codes for tokens on your backend server
+   - Never handle access tokens in frontend JavaScript
 
-3. **Environment Variables**: Never commit `.env` files with real credentials to version control
+3. **Public Applications**: PAR is designed for confidential clients with client credentials. Public applications should use PKCE instead.
 
-## Troubleshooting
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. **Connect your repository to Vercel**
+2. **Configure environment variables** in Vercel dashboard:
+   ```
+   VITE_BACKEND_URL=https://your-app.vercel.app
+   ```
+3. **Deploy** - Vercel will automatically detect the configuration
+
+### Manual Deployment
+
+1. **Build the application:**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy the `dist` folder** to your hosting provider
+
+3. **Configure environment variables** for production
+
+## 🐛 Troubleshooting
 
 ### Common Issues
 
@@ -152,31 +205,39 @@ src/
 - Ensure your Auth0 tenant supports PAR
 - Check that client credentials are correct
 - Verify the domain format (should not include `https://`)
+- Ensure the PAR application is a "Regular Web Application"
 
 **CORS Errors:**
-- Add your local development URL to Auth0 allowed origins
-- Ensure the callback URL is properly configured
+- Add your deployment URL to Auth0 allowed origins
+- Ensure the callback URL is properly configured in both applications
 
-**Invalid JSON:**
-- The JSON editor validates syntax in real-time
-- Check for missing quotes, commas, or brackets
+**Build Errors:**
+- Check that all JSX tags are properly closed
+- Verify TypeScript types are correct
+- Run `npm run build` locally to test
 
-## Contributing
+**Configuration Issues:**
+- Use the download example button to get the correct JSON format
+- Ensure both `regular` and `par` objects are present in your config
+- Check that all required fields are filled
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## 📚 Resources
 
-## License
-
-MIT License - see LICENSE file for details
-
-## Resources
-
-- [Auth0 Documentation](https://auth0.com/docs)
+- [Auth0 PAR Documentation](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow/authorization-code-flow-with-par)
 - [PAR RFC 9126](https://tools.ietf.org/rfc/rfc9126.txt)
 - [OAuth 2.1 Draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/)
+- [Auth0 Application Types](https://auth0.com/docs/get-started/applications/application-types)
 - [React Documentation](https://react.dev)
-- [Vite Documentation](https://vitejs.dev)
+- [Tailwind CSS](https://tailwindcss.com)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+MIT License - see LICENSE file for details

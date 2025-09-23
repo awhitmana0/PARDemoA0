@@ -176,7 +176,14 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
             )}
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              {isParFlow && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  Enhanced Security
+                </span>
+              )}
+            </div>
             <p className="text-gray-600 mt-1 leading-relaxed">{description}</p>
             <p className="text-xs text-gray-500 mt-2">
               {isParFlow
@@ -184,11 +191,6 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
                 : "Requires a separate Auth0 application with PAR disabled"
               }
             </p>
-            {isParFlow && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-2">
-                Enhanced Security
-              </span>
-            )}
           </div>
         </div>
       </div>
