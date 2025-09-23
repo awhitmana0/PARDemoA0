@@ -248,6 +248,7 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
             </div>
           )}
         </div>
+        </div>
 
         {/* Right Column - Callback URL */}
         <div className="space-y-4">
