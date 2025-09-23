@@ -8,7 +8,7 @@ interface ConfigType {
   response_type: string
   scope: string
   audience: string
-  state: string
+  state?: string
   domain: string
   prompt: string
   client_secret?: string

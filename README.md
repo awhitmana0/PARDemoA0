@@ -83,7 +83,6 @@ Create a JSON configuration file with both application details:
     "response_type": "code",
     "scope": "openid profile email",
     "audience": "your-api-audience",
-    "state": "random-state-string",
     "domain": "your-domain.auth0.com",
     "prompt": "login"
   },
@@ -92,13 +91,14 @@ Create a JSON configuration file with both application details:
     "response_type": "code",
     "scope": "openid profile email",
     "audience": "your-api-audience",
-    "state": "random-state-string",
     "domain": "your-domain.auth0.com",
     "prompt": "login",
     "client_secret": "your-par-client-secret"
   }
 }
 ```
+
+**Note**: The `state` parameter is automatically generated for security purposes. You can optionally include it in your configuration file if you need a specific state value, otherwise a random one will be generated for each request.
 
 ## 🏗️ Architecture
 

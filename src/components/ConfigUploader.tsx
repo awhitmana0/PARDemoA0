@@ -6,7 +6,7 @@ interface ConfigType {
   response_type: string
   scope: string
   audience: string
-  state: string
+  state?: string
   domain: string
   prompt: string
   client_secret?: string
@@ -29,7 +29,7 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const validateConfig = (config: any): config is SharedConfigType => {
-    const requiredFields = ['client_id', 'response_type', 'scope', 'audience', 'state', 'domain', 'prompt']
+    const requiredFields = ['client_id', 'response_type', 'scope', 'audience', 'domain', 'prompt']
 
     // Check if it has regular and par properties
     if (!config.regular || !config.par) {
@@ -123,7 +123,6 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
         response_type: "code",
         scope: "openid profile email",
         audience: "your-api-audience",
-        state: "random-state-string",
         domain: "your-domain.auth0.com",
         prompt: "login"
       },
@@ -132,7 +131,6 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
         response_type: "code",
         scope: "openid profile email",
         audience: "your-api-audience",
-        state: "random-state-string",
         domain: "your-domain.auth0.com",
         prompt: "login",
         client_secret: "your-par-client-secret"
@@ -307,7 +305,6 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
     "response_type": "code",
     "scope": "openid profile email",
     "audience": "your-api-audience",
-    "state": "random-state-string",
     "domain": "your-domain.auth0.com",
     "prompt": "login"
   },
@@ -316,7 +313,6 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
     "response_type": "code",
     "scope": "openid profile email",
     "audience": "your-api-audience",
-    "state": "random-state-string",
     "domain": "your-domain.auth0.com",
     "prompt": "login",
     "client_secret": "your-par-client-secret"

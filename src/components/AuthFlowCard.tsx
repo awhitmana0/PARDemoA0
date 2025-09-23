@@ -13,7 +13,7 @@ interface ConfigType {
   response_type: string
   scope: string
   audience: string
-  state: string
+  state?: string
   domain: string
   prompt: string
   client_secret?: string
@@ -29,7 +29,6 @@ const defaultConfig: ConfigType = {
   response_type: "code",
   scope: "openid profile email",
   audience: "your-api-audience",
-  state: Math.random().toString(36).substring(7),
   domain: "your-domain.auth0.com",
   prompt: "login"
 }
@@ -75,6 +74,9 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
     setIsGenerating(true)
 
     try {
+      // Generate state if not provided in config
+      const state = config.state || Math.random().toString(36).substring(2, 15)
+
       if (type === 'regular') {
         // Regular OAuth flow
         const params = new URLSearchParams({
@@ -83,7 +85,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
           response_type: config.response_type,
           scope: config.scope,
           audience: config.audience,
-          state: config.state,
+          state: state,
           prompt: config.prompt
         })
 
@@ -101,7 +103,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
           response_type: config.response_type,
           scope: config.scope.replace(/\s+/g, ''), // Remove spaces like in curl
           audience: config.audience,
-          state: config.state,
+          state: state,
           prompt: config.prompt,
           client_secret: config.client_secret || ''
         }
