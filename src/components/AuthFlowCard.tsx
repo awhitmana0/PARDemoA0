@@ -95,7 +95,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
 
     try {
       // Use defaults if not provided in config
-      const state = config.state || Math.random().toString(36).substring(2, 15)
+      const state = config.state || `${type}_${Math.random().toString(36).substring(2, 15)}`
       const response_type = config.response_type || "code"
       let scope = config.scope || "openid profile email"
 

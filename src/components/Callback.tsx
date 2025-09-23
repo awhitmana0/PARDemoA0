@@ -78,13 +78,15 @@ const Callback = () => {
           return
         }
 
-        // Determine which config to use based on current URL or stored preference
-        // For now, try PAR config first, then regular
-        let configToUse = savedConfig.par
-        let flowType = 'PAR'
+        // Determine which config to use based on the state parameter
+        // The state parameter should start with 'regular_' or 'par_'
+        let configToUse = savedConfig.regular  // Default to regular OAuth
+        let flowType = 'Regular OAuth'
 
-        // If PAR config doesn't have client_secret, use regular config
-        if (!configToUse.client_secret) {
+        if (state && state.startsWith('par_')) {
+          configToUse = savedConfig.par
+          flowType = 'PAR'
+        } else if (state && state.startsWith('regular_')) {
           configToUse = savedConfig.regular
           flowType = 'Regular OAuth'
         }
