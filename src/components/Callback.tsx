@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 import { getBackendUrl } from '../utils/config'
 import { decodeJWT, formatTokenClaims } from '../utils/jwt'
 import { loadConfigFromCookies } from '../utils/cookies'
@@ -21,6 +22,7 @@ interface UserInfo {
 }
 
 const Callback = () => {
+  const { user, isAuthenticated, isLoading, getAccessTokenSilently, getIdTokenClaims } = useAuth0()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
@@ -29,10 +31,54 @@ const Callback = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [idTokenClaims, setIdTokenClaims] = useState<any>(null)
   const [isRealTokens, setIsRealTokens] = useState(false)
+  const [isAuth0SDK, setIsAuth0SDK] = useState(false)
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Check if this is an Auth0 SDK authentication
+        if (isAuthenticated && user) {
+          console.log('🟢 Auth0 SDK Authentication detected')
+          setIsAuth0SDK(true)
+          setIsRealTokens(true)
+
+          try {
+            // Get tokens from Auth0 SDK
+            const accessToken = await getAccessTokenSilently()
+            const idTokenClaims = await getIdTokenClaims()
+
+            setTokens({
+              access_token: accessToken,
+              id_token: 'Available via Auth0 SDK',
+              token_type: 'Bearer',
+              expires_in: 86400, // Default to 24 hours
+              scope: 'openid profile email'
+            })
+
+            setUserInfo({
+              sub: user.sub,
+              name: user.name,
+              email: user.email,
+              picture: user.picture,
+              nickname: user.nickname,
+              email_verified: user.email_verified
+            })
+
+            if (idTokenClaims) {
+              setIdTokenClaims(idTokenClaims)
+            }
+
+            setLoading(false)
+            return
+          } catch (err) {
+            console.error('Error getting Auth0 SDK tokens:', err)
+            setError('Failed to retrieve tokens from Auth0 SDK')
+            setLoading(false)
+            return
+          }
+        }
+
+        // Handle manual OAuth flow
         const code = searchParams.get('code')
         const state = searchParams.get('state')
         const authError = searchParams.get('error')
@@ -44,7 +90,10 @@ const Callback = () => {
         }
 
         if (!code) {
-          setError('No authorization code received')
+          // If no code and not authenticated via SDK, this might be a direct navigation
+          if (!isAuthenticated) {
+            setError('No authorization code received and not authenticated via Auth0 SDK')
+          }
           return
         }
 
@@ -160,7 +209,7 @@ const Callback = () => {
     }
 
     handleCallback()
-  }, [searchParams])
+  }, [searchParams, isAuthenticated, user, isLoading, getAccessTokenSilently, getIdTokenClaims])
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -249,12 +298,15 @@ const Callback = () => {
               </div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">Authorization Successful!</h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                The OAuth/PAR flow completed successfully. Below you can see the received parameters and {isRealTokens ? 'real Auth0 tokens' : 'mock responses'}.
+                {isAuth0SDK
+                  ? 'Authentication completed using the Auth0 React SDK. Below you can see the user information and tokens handled securely by the SDK.'
+                  : `The OAuth/PAR flow completed successfully. Below you can see the received parameters and ${isRealTokens ? 'real Auth0 tokens' : 'mock responses'}.`
+                }
               </p>
               {isRealTokens && (
                 <div className="mt-4 inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  Real tokens from Auth0
+                  {isAuth0SDK ? 'Auth0 React SDK' : 'Real tokens from Auth0'}
                 </div>
               )}
             </div>

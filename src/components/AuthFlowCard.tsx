@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import { getCallbackUrl, getBackendUrl } from '../utils/config'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from './ui/dialog'
 import { Button } from './ui/button'
@@ -7,7 +8,7 @@ import { Settings } from 'lucide-react'
 interface AuthFlowCardProps {
   title: string
   description: string
-  flowType: 'regular' | 'par'
+  flowType: 'regular' | 'par' | 'auth0-sdk'
   externalConfig?: SharedConfigType | null
 }
 
@@ -40,6 +41,8 @@ const defaultPARConfig: ConfigType = {
 }
 
 function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlowCardProps) {
+  const { loginWithRedirect, isAuthenticated, user, isLoading, error: auth0Error } = useAuth0()
+
   const [config, setConfig] = useState(flowType === 'par' ? defaultPARConfig : defaultConfig)
   const [authUrl, setAuthUrl] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -203,6 +206,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
   }
 
   const isParFlow = flowType === 'par'
+  const isAuth0SDK = flowType === 'auth0-sdk'
 
   // Function to get display config without defaults (unless explicitly set)
   const getDisplayConfig = () => {
@@ -225,9 +229,14 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
       <div className="relative">
         <div className="flex items-start space-x-4">
           <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+            isAuth0SDK ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
             isParFlow ? 'bg-gradient-to-br from-purple-500 to-indigo-600' : 'bg-gradient-to-br from-blue-500 to-cyan-600'
           }`}>
-            {isParFlow ? (
+            {isAuth0SDK ? (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ) : isParFlow ? (
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -240,6 +249,11 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+              {isAuth0SDK && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Recommended
+                </span>
+              )}
               {isParFlow && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                   Enhanced Security
@@ -360,50 +374,116 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
 
       {/* Buttons */}
       <div className="space-y-4">
-        <button
-          onClick={() => generateUrl(flowType)}
-          disabled={isGenerating || Boolean(error && error.includes('Invalid JSON'))}
-          className={`group relative w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform ${
-            isGenerating || (error && error.includes('Invalid JSON'))
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : `${
-                  isParFlow
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
-                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
-                } text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`
-          }`}
-        >
-          <span className="flex items-center justify-center space-x-2">
-            {isGenerating ? (
-              <>
-                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Generating...</span>
-              </>
+        {isAuth0SDK ? (
+          // Auth0 SDK Flow - Direct login with SDK
+          <>
+            {isAuthenticated ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-green-800">Authentication Successful!</p>
+                      <p className="text-sm text-green-700">Welcome, {user?.name || user?.email || 'User'}</p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => window.location.href = '/callback'}
+                  className="group relative w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span className="flex items-center justify-center space-x-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>View Tokens & User Info</span>
+                  </span>
+                </button>
+              </div>
             ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                <span>Generate Authorization URL</span>
-              </>
+              <button
+                onClick={() => loginWithRedirect()}
+                disabled={isLoading}
+                className={`group relative w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform ${
+                  isLoading
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]'
+                }`}
+              >
+                <span className="flex items-center justify-center space-x-2">
+                  {isLoading ? (
+                    <>
+                      <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      </svg>
+                      <span>Login with Auth0 SDK</span>
+                    </>
+                  )}
+                </span>
+              </button>
             )}
-          </span>
-        </button>
+          </>
+        ) : (
+          // Manual OAuth/PAR Flow
+          <>
+            <button
+              onClick={() => generateUrl(flowType)}
+              disabled={isGenerating || Boolean(error && error.includes('Invalid JSON'))}
+              className={`group relative w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform ${
+                isGenerating || (error && error.includes('Invalid JSON'))
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : `${
+                      isParFlow
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                        : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
+                    } text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]`
+              }`}
+            >
+              <span className="flex items-center justify-center space-x-2">
+                {isGenerating ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <span>Generate Authorization URL</span>
+                  </>
+                )}
+              </span>
+            </button>
 
-        {authUrl && (
-          <button
-            onClick={() => window.location.href = authUrl}
-            className="group relative w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <span className="flex items-center justify-center space-x-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              <span>Continue to Auth0</span>
-            </span>
-          </button>
+            {authUrl && (
+              <button
+                onClick={() => window.location.href = authUrl}
+                className="group relative w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <span className="flex items-center justify-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  <span>Continue to Auth0</span>
+                </span>
+              </button>
+            )}
+          </>
         )}
       </div>
 
