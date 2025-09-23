@@ -4,6 +4,14 @@ import AuthFlowCard from './AuthFlowCard'
 import ConfigUploader from './ConfigUploader'
 import { saveConfigToCookies, loadConfigFromCookies, clearConfigFromCookies, hasConfigInCookies } from '../utils/cookies'
 import { getAuthSession, clearAuthSession } from '../utils/auth'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "./ui/navigation-menu"
 
 interface ConfigType {
   client_id: string
@@ -80,79 +88,103 @@ export default function HomePage() {
                 PAR Demo
               </h1>
             </div>
-            <div className="hidden md:flex items-center space-x-3">
-              {userAuthenticated && authSession && (
-                <>
-                  {/* User Info */}
-                  <div className="flex items-center space-x-3 bg-green-50 border border-green-200 rounded-xl px-4 py-2">
-                    {authSession.userInfo?.picture && (
-                      <img
-                        src={authSession.userInfo.picture}
-                        alt="User avatar"
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-green-800">
-                        {authSession.userInfo?.name || authSession.userInfo?.email || 'User'}
-                      </span>
-                      <span className="text-xs text-green-600">
-                        Authenticated via {authSession.flowType}
-                      </span>
+            <NavigationMenu>
+              <NavigationMenuList>
+                {userAuthenticated && authSession && (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="flex items-center space-x-3 bg-green-50 border border-green-200 px-4 py-2">
+                      {authSession.userInfo?.picture && (
+                        <img
+                          src={authSession.userInfo.picture}
+                          alt="User avatar"
+                          className="w-6 h-6 rounded-full"
+                        />
+                      )}
+                      <div className="flex flex-col text-left">
+                        <span className="text-sm font-medium text-green-800">
+                          {authSession.userInfo?.name || authSession.userInfo?.email || 'User'}
+                        </span>
+                        <span className="text-xs text-green-600">
+                          Authenticated via {authSession.flowType}
+                        </span>
+                      </div>
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="grid gap-3 p-6 w-[400px]">
+                        <div className="grid gap-3">
+                          <button
+                            onClick={goToAuthenticated}
+                            className="flex items-center space-x-2 p-3 rounded-lg hover:bg-blue-50 border border-blue-200 transition-all duration-200"
+                          >
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <div className="text-left">
+                              <div className="font-medium text-blue-900">View Authentication Details</div>
+                              <div className="text-sm text-blue-600">See tokens, claims, and user info</div>
+                            </div>
+                          </button>
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-2 p-3 rounded-lg hover:bg-red-50 border border-red-200 transition-all duration-200"
+                          >
+                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <div className="text-left">
+                              <div className="font-medium text-red-900">Logout</div>
+                              <div className="text-sm text-red-600">Clear authentication session</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Settings</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-3 p-6 w-[400px]">
+                      <div className="grid gap-3">
+                        {hasCookies && (
+                          <button
+                            onClick={handleClearCookies}
+                            className="flex items-center space-x-2 p-3 rounded-lg hover:bg-red-50 border border-red-200 transition-all duration-200"
+                          >
+                            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <div className="text-left">
+                              <div className="font-medium text-red-900">Clear Saved Config</div>
+                              <div className="text-sm text-red-600">Remove stored OAuth configuration</div>
+                            </div>
+                          </button>
+                        )}
+                        <NavigationMenuLink
+                          href="https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow/authorization-code-flow-with-par"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 p-3 rounded-lg hover:bg-blue-50 border border-blue-200 transition-all duration-200"
+                        >
+                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                          </svg>
+                          <div className="text-left">
+                            <div className="font-medium text-blue-900">View Documentation</div>
+                            <div className="text-sm text-blue-600">Auth0 PAR implementation guide</div>
+                          </div>
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </NavigationMenuLink>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* View Details Button */}
-                  <button
-                    onClick={goToAuthenticated}
-                    className="inline-flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 rounded-xl px-4 py-2 text-sm font-medium text-blue-700 hover:text-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    <span>View Details</span>
-                  </button>
-
-                  {/* Logout Button */}
-                  <button
-                    onClick={handleLogout}
-                    className="inline-flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-xl px-4 py-2 text-sm font-medium text-red-700 hover:text-red-800 transition-all duration-300 shadow-sm hover:shadow-md"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Logout</span>
-                  </button>
-                </>
-              )}
-
-              {hasCookies && (
-                <button
-                  onClick={handleClearCookies}
-                  className="inline-flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-xl px-4 py-2 text-sm font-medium text-red-700 hover:text-red-800 transition-all duration-300 shadow-sm hover:shadow-md"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span>Clear Saved Config</span>
-                </button>
-              )}
-              <a
-                href="https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow/authorization-code-flow-with-par"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 bg-white/80 hover:bg-white/90 border border-gray-200 hover:border-blue-300 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-700 transition-all duration-300 shadow-sm hover:shadow-md"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span>View Documentation</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
         </div>
       </header>
