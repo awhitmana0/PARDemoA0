@@ -70,10 +70,9 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
   }
 
   const generateUrl = async (type: 'regular' | 'par') => {
-    if (error) return
-
-    setIsGenerating(true)
+    // Clear any previous errors when user tries again
     setError('')
+    setIsGenerating(true)
 
     try {
       if (type === 'regular') {
