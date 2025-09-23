@@ -2,6 +2,8 @@
 
 A comprehensive demonstration application comparing OAuth 2.0 Authorization Code flow with Pushed Authorization Request (PAR) flow using Auth0.
 
+Live Demo Site: https://par-demo-two.vercel.app/ 
+
 ## 🎯 Purpose
 
 This demo application helps developers understand the differences between traditional OAuth 2.0 flows and the enhanced security provided by PAR (Pushed Authorization Request). It provides a side-by-side comparison showing how PAR improves security by moving authorization parameters from the front-channel to a secure back-channel.
@@ -9,12 +11,9 @@ This demo application helps developers understand the differences between tradit
 ## ✨ Features
 
 - 🔐 **Dual Auth Flows**: Compare regular OAuth and PAR side-by-side
-- 🎨 **Modern UI**: Clean, responsive design with Tailwind CSS v4
 - 📁 **JSON Configuration**: Upload config files to quickly populate both flows
 - 🍪 **Cookie Persistence**: Save configurations across browser sessions
-- 🔄 **Copy to Clipboard**: Easy callback URL copying
 - 🚀 **Full-Stack**: Frontend + Vercel serverless functions for CORS-free PAR requests
-- 📱 **Responsive**: Works seamlessly on desktop and mobile devices
 
 ## 🚀 Quick Start
 
