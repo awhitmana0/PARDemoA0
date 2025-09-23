@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import AuthFlowCard from './AuthFlowCard'
 import ConfigUploader from './ConfigUploader'
 import { saveConfigToCookies, loadConfigFromCookies, clearConfigFromCookies, hasConfigInCookies } from '../utils/cookies'
-import { getAuthSession, clearAuthSession, isAuthenticated } from '../utils/auth'
+import { getAuthSession, clearAuthSession } from '../utils/auth'
 
 interface ConfigType {
   client_id: string
