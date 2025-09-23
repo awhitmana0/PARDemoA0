@@ -41,7 +41,7 @@ const defaultPARConfig: ConfigType = {
 }
 
 function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlowCardProps) {
-  const { loginWithRedirect, isAuthenticated, user, isLoading, error: auth0Error } = useAuth0()
+  const { loginWithRedirect, isAuthenticated, user, isLoading } = useAuth0()
 
   const [config, setConfig] = useState(flowType === 'par' ? defaultPARConfig : defaultConfig)
   const [authUrl, setAuthUrl] = useState('')
