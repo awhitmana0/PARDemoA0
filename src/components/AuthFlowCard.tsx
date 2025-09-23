@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getCallbackUrl, getBackendUrl } from '../utils/config'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from './ui/dialog'
+import { Button } from './ui/button'
+import { Settings } from 'lucide-react'
 
 interface AuthFlowCardProps {
   title: string
@@ -42,6 +45,9 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
   const [requestUri, setRequestUri] = useState('')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [tempConfig, setTempConfig] = useState('')
+  const [tempError, setTempError] = useState('')
 
   // Update config when external config is provided
   useEffect(() => {
@@ -56,14 +62,29 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
     }
   }, [externalConfig, flowType])
 
-  const handleConfigChange = (value: string) => {
+
+  const openDialog = () => {
+    setTempConfig(JSON.stringify(getDisplayConfig(), null, 2))
+    setTempError('')
+    setIsDialogOpen(true)
+  }
+
+  const handleDialogSave = () => {
     try {
-      const parsed = JSON.parse(value)
+      const parsed = JSON.parse(tempConfig)
       setConfig(parsed)
       setError('')
+      setTempError('')
+      setIsDialogOpen(false)
     } catch (err) {
-      setError('Invalid JSON format')
+      setTempError('Invalid JSON format')
     }
+  }
+
+  const handleDialogCancel = () => {
+    setTempConfig('')
+    setTempError('')
+    setIsDialogOpen(false)
   }
 
   const generateUrl = async (type: 'regular' | 'par') => {
@@ -162,7 +183,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
   // Function to get display config without defaults (unless explicitly set)
   const getDisplayConfig = () => {
     const { state, response_type, scope, ...configWithoutDefaults } = config
-    const displayConfig = { ...configWithoutDefaults }
+    const displayConfig: ConfigType = { ...configWithoutDefaults }
 
     // Only include these fields if they were explicitly set in an external config
     if (externalConfig) {
@@ -212,29 +233,67 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
         </div>
       </div>
 
-      {/* JSON Config Textarea */}
+      {/* Configuration Button */}
       <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-3">
-          Configuration
-        </label>
-        <div className="relative">
-          <textarea
-            value={JSON.stringify(getDisplayConfig(), null, 2)}
-            onChange={(e) => handleConfigChange(e.target.value)}
-            className="w-full h-40 p-4 text-sm font-mono bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none shadow-inner transition-all duration-200 hover:bg-gray-50/80"
-            placeholder="Enter JSON configuration..."
-          />
-          {error && (
-            <div className="absolute -bottom-1 left-0 right-0 bg-red-50 border border-red-200 rounded-lg p-2 mt-1">
-              <p className="text-red-700 text-sm flex items-center">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {error}
-              </p>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              onClick={openDialog}
+              className="w-full justify-start gap-2 h-12 text-left"
+            >
+              <Settings className="w-4 h-4" />
+              <div className="flex flex-col items-start">
+                <span className="font-medium">Edit Configuration</span>
+                <span className="text-xs text-gray-500">Click to modify OAuth parameters</span>
+              </div>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit {title} Configuration</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  JSON Configuration
+                </label>
+                <textarea
+                  value={tempConfig}
+                  onChange={(e) => setTempConfig(e.target.value)}
+                  className="w-full h-64 p-4 text-sm font-mono bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  placeholder="Enter JSON configuration..."
+                />
+                {tempError && (
+                  <p className="text-red-600 text-sm mt-2 flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {tempError}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleDialogCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleDialogSave}>
+                Save Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {error && (
+          <div className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2">
+            <p className="text-red-700 text-sm flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Request URI Display (PAR only) */}

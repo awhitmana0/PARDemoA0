@@ -1,9 +1,9 @@
 interface ConfigType {
   client_id: string
-  response_type: string
-  scope: string
+  response_type?: string
+  scope?: string
   audience: string
-  state: string
+  state?: string
   domain: string
   prompt: string
   client_secret?: string
