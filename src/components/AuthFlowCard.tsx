@@ -122,7 +122,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
           client_id: config.client_id,
           redirect_uri: getCallbackUrl(),
           response_type: response_type,
-          scope: scope.replace(/\s+/g, ''), // Remove spaces like in curl
+          scope: scope, // Keep spaces for proper OAuth scope formatting
           audience: config.audience,
           state: state,
           prompt: config.prompt,

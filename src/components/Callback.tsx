@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { decodeJWT, formatTokenClaims } from '../utils/jwt'
+import { loadConfigFromCookies } from '../utils/cookies'
 
 interface TokenResponse {
   access_token?: string
@@ -24,6 +26,8 @@ const Callback = () => {
   const [error, setError] = useState<string>('')
   const [tokens, setTokens] = useState<TokenResponse | null>(null)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [idTokenClaims, setIdTokenClaims] = useState<any>(null)
+  const [isRealTokens, setIsRealTokens] = useState(false)
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -46,27 +50,105 @@ const Callback = () => {
         console.log('Received authorization code:', code)
         console.log('State parameter:', state)
 
-        // In a real application, you would exchange the code for tokens
-        // on your backend server. For this demo, we'll show the received parameters.
+        // Try to get configuration from cookies to determine which client to use
+        const savedConfig = loadConfigFromCookies()
 
-        // Simulate token exchange (this would be done on your backend)
-        const mockTokens: TokenResponse = {
-          access_token: 'mock_access_token_' + Math.random().toString(36).substr(2, 9),
-          id_token: 'mock_id_token_' + Math.random().toString(36).substr(2, 9),
-          token_type: 'Bearer',
-          expires_in: 3600,
-          scope: 'openid profile email'
+        if (!savedConfig) {
+          console.log('No saved configuration found, using mock tokens for demo')
+          // Fallback to mock tokens if no config is available
+          const mockTokens: TokenResponse = {
+            access_token: 'mock_access_token_' + Math.random().toString(36).substr(2, 9),
+            id_token: 'mock_id_token_' + Math.random().toString(36).substr(2, 9),
+            token_type: 'Bearer',
+            expires_in: 3600,
+            scope: 'openid profile email'
+          }
+
+          const mockUserInfo: UserInfo = {
+            sub: 'user123',
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            picture: 'https://via.placeholder.com/100'
+          }
+
+          setTokens(mockTokens)
+          setUserInfo(mockUserInfo)
+          setIsRealTokens(false)
+          return
         }
 
-        const mockUserInfo: UserInfo = {
-          sub: 'user123',
-          name: 'John Doe',
-          email: 'john.doe@example.com',
-          picture: 'https://via.placeholder.com/100'
+        // Determine which config to use based on current URL or stored preference
+        // For now, try PAR config first, then regular
+        let configToUse = savedConfig.par
+        let flowType = 'PAR'
+
+        // If PAR config doesn't have client_secret, use regular config
+        if (!configToUse.client_secret) {
+          configToUse = savedConfig.regular
+          flowType = 'Regular OAuth'
         }
 
-        setTokens(mockTokens)
-        setUserInfo(mockUserInfo)
+        console.log(`Attempting token exchange using ${flowType} configuration`)
+
+        // Exchange authorization code for real tokens directly with Auth0
+        const tokenEndpoint = `https://${configToUse.domain}/oauth/token`
+
+        const tokenRequestBody = {
+          grant_type: 'authorization_code',
+          client_id: configToUse.client_id,
+          client_secret: configToUse.client_secret || '',
+          code: code,
+          redirect_uri: window.location.origin + '/callback'
+        }
+
+        console.log('🔵 Requesting token exchange:', {
+          ...tokenRequestBody,
+          client_secret: tokenRequestBody.client_secret ? '[REDACTED]' : undefined
+        })
+
+        const tokenResponse = await fetch(tokenEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams(tokenRequestBody)
+        })
+
+        if (!tokenResponse.ok) {
+          const errorText = await tokenResponse.text()
+          console.log('🔴 Token exchange failed:', errorText)
+          throw new Error(`Token exchange failed: ${tokenResponse.status} ${errorText}`)
+        }
+
+        const tokenData = await tokenResponse.json()
+        console.log('✅ Real tokens received:', {
+          ...tokenData,
+          access_token: tokenData.access_token ? '[REDACTED]' : undefined,
+          id_token: tokenData.id_token ? '[REDACTED]' : undefined
+        })
+
+        setTokens(tokenData)
+        setIsRealTokens(true)
+
+        // Parse ID token if present
+        if (tokenData.id_token) {
+          const decodedIdToken = decodeJWT(tokenData.id_token)
+          if (decodedIdToken) {
+            console.log('✅ ID Token decoded:', decodedIdToken)
+            setIdTokenClaims(decodedIdToken)
+
+            // Extract user info from ID token
+            const userInfoFromToken: UserInfo = {
+              sub: decodedIdToken.sub,
+              name: decodedIdToken.name,
+              email: decodedIdToken.email,
+              picture: decodedIdToken.picture,
+              nickname: decodedIdToken.nickname,
+              email_verified: decodedIdToken.email_verified
+            }
+            setUserInfo(userInfoFromToken)
+          }
+        }
 
       } catch (err) {
         console.error('Callback error:', err)
@@ -166,8 +248,14 @@ const Callback = () => {
               </div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">Authorization Successful!</h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                The OAuth/PAR flow completed successfully. Below you can see the received parameters and mock responses.
+                The OAuth/PAR flow completed successfully. Below you can see the received parameters and {isRealTokens ? 'real Auth0 tokens' : 'mock responses'}.
               </p>
+              {isRealTokens && (
+                <div className="mt-4 inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  Real tokens from Auth0
+                </div>
+              )}
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
@@ -197,7 +285,9 @@ const Callback = () => {
               {userInfo && (
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">User Information</h3>
-                  <p className="text-sm text-gray-600 mb-4">Mock user profile data (demo purposes)</p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {isRealTokens ? 'Real user profile from ID token' : 'Mock user profile data (demo purposes)'}
+                  </p>
                   <div className="flex items-center space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
                     {userInfo.picture && (
                       <img
@@ -235,9 +325,35 @@ const Callback = () => {
             {tokens && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Access Tokens</h3>
-                <p className="text-sm text-gray-600 mb-4">Mock token response (in production, this would be handled securely on your backend)</p>
+                <p className="text-sm text-gray-600 mb-4">
+                  {isRealTokens ? 'Real tokens from Auth0 token exchange' : 'Mock token response (in production, this would be handled securely on your backend)'}
+                </p>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Object.entries(tokens).map(([key, value]) => (
+                    <div key={key} className="p-4 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-900 text-sm">{key}</span>
+                        <button
+                          onClick={() => copyToClipboard(String(value))}
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 break-all font-mono">{String(value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ID Token Claims */}
+            {idTokenClaims && isRealTokens && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ID Token Claims</h3>
+                <p className="text-sm text-gray-600 mb-4">Decoded claims from the ID token JWT</p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {Object.entries(formatTokenClaims(idTokenClaims)).map(([key, value]) => (
                     <div key={key} className="p-4 bg-gray-50 rounded-lg border">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-gray-900 text-sm">{key}</span>
