@@ -109,7 +109,7 @@ export default function HomePage() {
                         </span>
                       </div>
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent>
+                    <NavigationMenuContent className="right-0 left-auto">
                       <div className="grid gap-3 p-6 w-[400px]">
                         <div className="grid gap-3">
                           <button
@@ -145,7 +145,7 @@ export default function HomePage() {
 
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Settings</NavigationMenuTrigger>
-                  <NavigationMenuContent>
+                  <NavigationMenuContent className="right-0 left-auto">
                     <div className="grid gap-3 p-6 w-[400px]">
                       <div className="grid gap-3">
                         {hasCookies && (
