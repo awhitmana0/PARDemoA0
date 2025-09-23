@@ -165,10 +165,6 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
 
   return (
     <div className="mb-12">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Configuration File</h3>
-      </div>
-
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* Left Column - Upload */}
