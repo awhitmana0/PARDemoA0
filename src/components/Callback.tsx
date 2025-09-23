@@ -32,6 +32,7 @@ const Callback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Handle manual OAuth flow
         const code = searchParams.get('code')
         const state = searchParams.get('state')
         const authError = searchParams.get('error')
@@ -281,7 +282,7 @@ const Callback = () => {
                 </div>
               </div>
 
-              {/* Mock User Info */}
+              {/* User Info */}
               {userInfo && (
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">User Information</h3>
@@ -321,7 +322,7 @@ const Callback = () => {
               )}
             </div>
 
-            {/* Mock Tokens */}
+            {/* Tokens */}
             {tokens && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Access Tokens</h3>

@@ -40,6 +40,7 @@ const defaultPARConfig: ConfigType = {
 }
 
 function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlowCardProps) {
+
   const [config, setConfig] = useState(flowType === 'par' ? defaultPARConfig : defaultConfig)
   const [authUrl, setAuthUrl] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -96,7 +97,31 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
       // Use defaults if not provided in config
       const state = config.state || Math.random().toString(36).substring(2, 15)
       const response_type = config.response_type || "code"
-      const scope = config.scope || "openid profile email"
+      let scope = config.scope || "openid profile email"
+
+      // Ensure scope has proper spacing (fix common issue where spaces get removed)
+      if (scope && typeof scope === 'string') {
+        const originalScope = scope
+        // Handle common malformed scope patterns
+        if (scope.includes('openid') && !scope.includes(' ')) {
+          // Convert "openidprofileemail" to "openid profile email"
+          scope = scope
+            .replace(/^openid/, 'openid ')
+            .replace(/profile/, 'profile ')
+            .replace(/email/, 'email ')
+            .replace(/\s+/g, ' ')
+            .trim()
+        }
+        // Ensure minimum required scopes
+        if (!scope.includes('openid')) {
+          scope = 'openid ' + scope
+        }
+        if (originalScope !== scope) {
+          console.log('🔧 Fixed malformed scope:', originalScope, '→', scope)
+        }
+      }
+
+      console.log('🔵 Using scope:', scope)
 
       if (type === 'regular') {
         // Regular OAuth flow

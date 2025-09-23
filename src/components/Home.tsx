@@ -101,11 +101,11 @@ export default function HomePage() {
         <ConfigUploader onConfigLoad={handleConfigLoad} />
 
         {/* Two Column Layout with enhanced styling */}
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column - Regular OAuth */}
           <div className="transform hover:scale-[1.02] transition-transform duration-300">
             <AuthFlowCard
-              title="Regular OAuth Flow"
+              title="Manual OAuth Flow"
               description="Standard authorization code flow with URL parameters"
               flowType="regular"
               externalConfig={sharedConfig}
@@ -115,7 +115,7 @@ export default function HomePage() {
           {/* Right Column - PAR Flow */}
           <div className="transform hover:scale-[1.02] transition-transform duration-300">
             <AuthFlowCard
-              title="PAR Flow"
+              title="Manual PAR Flow"
               description="Enhanced security with Pushed Authorization Requests"
               flowType="par"
               externalConfig={sharedConfig}
