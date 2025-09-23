@@ -166,55 +166,30 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
   return (
     <div className="mb-12">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Quick Configuration</h3>
-        <p className="text-gray-600 mb-3">Upload a JSON file to populate both OAuth and PAR flow configurations</p>
-        <div className="inline-flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <strong>Required:</strong> Set your Auth0 callback URL to <code className="font-mono bg-blue-100 px-1 rounded">{getCallbackUrl()}</code>
-          <button
-            onClick={copyCallbackUrl}
-            className={`ml-2 inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors ${
-              copySuccess
-                ? 'bg-green-100 text-green-700 border border-green-200'
-                : 'bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200'
-            }`}
-          >
-            {copySuccess ? (
-              <>
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Copied!
-              </>
-            ) : (
-              <>
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy
-              </>
-            )}
-          </button>
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Configuration File</h3>
       </div>
 
-      <div
-        className={`relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 cursor-pointer ${
-          isDragOver
-            ? 'border-blue-400 bg-blue-50/50'
-            : uploadStatus === 'success'
-            ? 'border-green-400 bg-green-50/50'
-            : uploadStatus === 'error'
-            ? 'border-red-400 bg-red-50/50'
-            : 'border-gray-300 bg-white/50 hover:border-gray-400 hover:bg-gray-50/50'
-        }`}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={handleClick}
-      >
+      {/* Two Column Layout */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Left Column - Upload */}
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">Upload a JSON file to populate both OAuth and PAR flow configurations</p>
+
+          <div
+            className={`relative border-2 border-dashed rounded-xl p-6 transition-all duration-300 cursor-pointer ${
+              isDragOver
+                ? 'border-blue-400 bg-blue-50/50'
+                : uploadStatus === 'success'
+                ? 'border-green-400 bg-green-50/50'
+                : uploadStatus === 'error'
+                ? 'border-red-400 bg-red-50/50'
+                : 'border-gray-300 bg-white/50 hover:border-gray-400 hover:bg-gray-50/50'
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={handleClick}
+          >
         <input
           ref={fileInputRef}
           type="file"
@@ -272,6 +247,53 @@ export default function ConfigUploader({ onConfigLoad }: ConfigUploaderProps) {
               </div>
             </div>
           )}
+        </div>
+        </div>
+
+        {/* Right Column - Callback URL */}
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">Auth0 Application Configuration</p>
+
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-blue-900 mb-2">Required Setup</h4>
+                <p className="text-sm text-blue-800 mb-3">Set your Auth0 callback URL to:</p>
+                <div className="bg-white/80 rounded-lg p-3 mb-3">
+                  <code className="text-sm font-mono text-gray-800 break-all">{getCallbackUrl()}</code>
+                </div>
+                <button
+                  onClick={copyCallbackUrl}
+                  className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    copySuccess
+                      ? 'bg-green-100 text-green-700 border border-green-200'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  {copySuccess ? (
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy URL
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
