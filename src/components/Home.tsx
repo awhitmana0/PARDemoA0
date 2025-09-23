@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AuthFlowCard from './AuthFlowCard'
 import ConfigUploader from './ConfigUploader'
 import { saveConfigToCookies, loadConfigFromCookies, clearConfigFromCookies, hasConfigInCookies } from '../utils/cookies'
+import { getAuthSession, clearAuthSession, isAuthenticated } from '../utils/auth'
 
 interface ConfigType {
   client_id: string
@@ -20,10 +22,13 @@ interface SharedConfigType {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate()
   const [sharedConfig, setSharedConfig] = useState<SharedConfigType | null>(null)
   const [hasCookies, setHasCookies] = useState(false)
+  const [authSession, setAuthSession] = useState<any>(null)
+  const [userAuthenticated, setUserAuthenticated] = useState(false)
 
-  // Load config from cookies on mount
+  // Load config from cookies and check authentication on mount
   useEffect(() => {
     const savedConfig = loadConfigFromCookies()
     if (savedConfig) {
@@ -31,6 +36,13 @@ export default function HomePage() {
       setHasCookies(true)
     } else {
       setHasCookies(hasConfigInCookies())
+    }
+
+    // Check for existing authentication session
+    const session = getAuthSession()
+    if (session) {
+      setAuthSession(session)
+      setUserAuthenticated(true)
     }
   }, [])
 
@@ -47,6 +59,16 @@ export default function HomePage() {
     window.location.reload()
   }
 
+  const handleLogout = () => {
+    clearAuthSession()
+    setAuthSession(null)
+    setUserAuthenticated(false)
+  }
+
+  const goToAuthenticated = () => {
+    navigate('/authenticated')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       {/* Modern Header with gradient */}
@@ -59,6 +81,52 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="hidden md:flex items-center space-x-3">
+              {userAuthenticated && authSession && (
+                <>
+                  {/* User Info */}
+                  <div className="flex items-center space-x-3 bg-green-50 border border-green-200 rounded-xl px-4 py-2">
+                    {authSession.userInfo?.picture && (
+                      <img
+                        src={authSession.userInfo.picture}
+                        alt="User avatar"
+                        className="w-8 h-8 rounded-full"
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-green-800">
+                        {authSession.userInfo?.name || authSession.userInfo?.email || 'User'}
+                      </span>
+                      <span className="text-xs text-green-600">
+                        Authenticated via {authSession.flowType}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* View Details Button */}
+                  <button
+                    onClick={goToAuthenticated}
+                    className="inline-flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 rounded-xl px-4 py-2 text-sm font-medium text-blue-700 hover:text-blue-800 transition-all duration-300 shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>View Details</span>
+                  </button>
+
+                  {/* Logout Button */}
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-xl px-4 py-2 text-sm font-medium text-red-700 hover:text-red-800 transition-all duration-300 shadow-sm hover:shadow-md"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Logout</span>
+                  </button>
+                </>
+              )}
+
               {hasCookies && (
                 <button
                   onClick={handleClearCookies}

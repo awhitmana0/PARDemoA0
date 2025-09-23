@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { decodeJWT, formatTokenClaims } from '../utils/jwt'
 import { loadConfigFromCookies } from '../utils/cookies'
+import { saveAuthSession, clearAuthSession } from '../utils/auth'
 
 interface TokenResponse {
   access_token?: string
@@ -32,6 +33,9 @@ const Callback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Clear any existing auth session when starting new authentication
+        clearAuthSession()
+
         // Handle manual OAuth flow
         const code = searchParams.get('code')
         const state = searchParams.get('state')
@@ -133,15 +137,19 @@ const Callback = () => {
         setTokens(tokenData)
         setIsRealTokens(true)
 
+        let userInfoForSession: UserInfo | null = null
+        let idTokenClaimsForSession: any = null
+
         // Parse ID token if present
         if (tokenData.id_token) {
           const decodedIdToken = decodeJWT(tokenData.id_token)
           if (decodedIdToken) {
             console.log('✅ ID Token decoded:', decodedIdToken)
+            idTokenClaimsForSession = decodedIdToken
             setIdTokenClaims(decodedIdToken)
 
             // Extract user info from ID token
-            const userInfoFromToken: UserInfo = {
+            userInfoForSession = {
               sub: decodedIdToken.sub,
               name: decodedIdToken.name,
               email: decodedIdToken.email,
@@ -149,9 +157,13 @@ const Callback = () => {
               nickname: decodedIdToken.nickname,
               email_verified: decodedIdToken.email_verified
             }
-            setUserInfo(userInfoFromToken)
+            setUserInfo(userInfoForSession)
           }
         }
+
+        // Save authentication session and redirect to /authenticated
+        saveAuthSession(tokenData, userInfoForSession, idTokenClaimsForSession, flowType)
+        navigate('/authenticated')
 
       } catch (err) {
         console.error('Callback error:', err)
