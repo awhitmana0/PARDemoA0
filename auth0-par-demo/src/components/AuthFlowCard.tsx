@@ -255,7 +255,7 @@ function AuthFlowCard({ title, description, flowType, externalConfig }: AuthFlow
       <div className="space-y-4">
         <button
           onClick={() => generateUrl(flowType)}
-          disabled={isGenerating || (error && error.includes('Invalid JSON'))}
+          disabled={isGenerating || Boolean(error && error.includes('Invalid JSON'))}
           className={`group relative w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform ${
             isGenerating || (error && error.includes('Invalid JSON'))
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'

@@ -1,13 +1,8 @@
 {
-  "functions": {
-    "server/index.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/index.js"
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
     }
   ]
 }
