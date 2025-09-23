@@ -55,9 +55,8 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Auth0 Flow Demo
+                PAR Demo
               </h1>
-              <p className="text-gray-600 mt-1">Compare OAuth and PAR authentication flows</p>
             </div>
             <div className="hidden md:flex items-center space-x-3">
               {hasCookies && (
@@ -94,12 +93,8 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Explore Authentication Flows
+            Compare OAuth and PAR authentication flows
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Compare the traditional OAuth authorization code flow with the more secure
-            Pushed Authorization Request (PAR) flow side by side.
-          </p>
         </div>
 
         {/* Configuration Upload Section */}
